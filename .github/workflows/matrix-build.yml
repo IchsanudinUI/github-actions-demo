@@ -1,0 +1,40 @@
+name: Matrix Build
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # STRATEGY --> Define Matrix variable. di kasus ini, si node-version
+    strategy:
+      matrix:
+        node-version: [18,20,22] # ini tuh kayak list untuk LOOPING nanti yah? 
+
+    steps:
+      # untuk kasih tahu kita, everything starting fine :)
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - name: Install dependencies
+        run: npm install
+
+      # BUILD dummy Prod level ready build.txt
+      - name: Build project
+        run: |
+          mkdir dist
+          echo "This is the build artifact" > dist/build.txt
+
+      # Simple running test
+      - name: Run tests
+        run: npm test
+
+      # Upload artifact, suapya jadi url yg bisa kit akses :)
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-assets-${{ matrix.node-version }}
+          path: dist
